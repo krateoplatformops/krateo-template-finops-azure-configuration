@@ -1,0 +1,105 @@
+@startuml
+allowmixing
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 93
+
+title Krateo FinOps - Data Presentation
+
+package "Krateo Composable Portal" {
+  json Template {
+    "Portal" : ["CR_Card", "CR_Row", "..."], 
+    "CompositionDefinition" : "Ref"
+  }
+  json CompositionDefinition {
+  "Portal" : ["CR_Row", "CR_Card", "CR_Tabpane", "..."],
+  "Automation" : ["CR_VM", "CR_Network", "CR_Storage", "..."],
+  "FinOps" : ["CR_ExporterScraperConfig", "..."]
+  }
+  note as N1
+  Annotation
+  "krateo-finops-focus-resource": "..."
+  end note
+}
+
+package "Krateo Composable FinOps" {
+  database CrateDB
+  component "finops-database-handler"
+}
+
+object "composition-definition-parser" {
+Detects "ExternalResourceCreated"
+events on all composition 
+definitions
+}
+
+object "ServiceProvider" {
+  Azure, GCP, AWS, ...
+}
+
+object "OPA" {
+  Moving Window policy
+}
+
+component "finops-moving-window-microservice"
+component "finops-webhook-template"
+
+
+CompositionDefinition <- "composition-definition-parser" : Download Helm chart
+"finops-database-handler" <- "composition-definition-parser" : "\nParse and\nstore annotations"
+
+CompositionDefinition --> ServiceProvider : "Create new\nresources"
+ServiceProvider --> "finops-database-handler" : "Exporter/Scraper\nstore Cost/Usage data"
+"finops-moving-window-microservice" <--> "finops-database-handler" : "\n\n\nUsage data"
+OPA <-- "finops-moving-window-microservice" : "\n\n\n\n\n\nOptimization"
+
+"finops-database-handler" <--> CrateDB
+Template <-- "finops-database-handler" : Detailed or\nAggregated\nCosts
+Template ---> "finops-database-handler" :  "\n\n\n\n\n\nSend\nCompositionDefinition\nUID on cost\nestimation endpoint\n(notebook)"
+Template -> CompositionDefinition
+N1 -> CompositionDefinition
+
+"finops-webhook-template" <-- CompositionDefinition : "CREATE\nUPDATE"
+"finops-webhook-template" --> CompositionDefinition : "Patch\nOptimization"
+"finops-webhook-template" <-> OPA
+
+object "RestConfig" {
+  <service provider openapi schema>
+}
+
+object "DataPresentationProvider\n(CRD)" {
+  resourceName: ...
+  Zone: ...
+  ...
+}
+
+component "Kubernetes Operator\nGenerator (KOG)"
+component "FocusDataPresentation CDC"
+component RDC
+
+"RestConfig" --> "Kubernetes Operator\nGenerator (KOG)"
+"Kubernetes Operator\nGenerator (KOG)" -> RDC
+"DataPresentationProvider\n(CRD)" <- "Kubernetes Operator\nGenerator (KOG)" : Create
+
+
+package "Focus Data Presentation Composition" {
+  json DataPresentationProvider {
+  "annotations": ["focusResourceName: <same as annotation>"],
+    "zone": "...",
+    "resourceName": "..."
+  }
+  object FocusConfig {
+    <with data compiled by CDC at runtime>
+  }
+}
+
+"FocusDataPresentation CDC" -[hidden]> "DataPresentationProvider\n(CRD)"
+
+"Kubernetes Operator\nGenerator (KOG)" -[hidden]> "finops-database-handler"
+
+"DataPresentationProvider\n(CRD)" .> DataPresentationProvider : "\tCR"
+"FocusDataPresentation CDC" <--> DataPresentationProvider
+"FocusDataPresentation CDC" -> FocusConfig : vendor-specific\npricing information
+"finops-database-handler" <-- FocusConfig : exporter/scraper flow\nto store FOCUS\nrows with pricing\ninformation only
+
+@enduml

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Secret
+metadata: 
+  name: azure-storage-account
+  namespace: krateo-system
+stringData:
+  server-url: https://<account_name>.blob.core.windows.net
+---
+apiVersion: v1
+kind: Secret
+metadata: 
+  name: azure-management-api
+  namespace: krateo-system
+stringData:
+  server-url: https://management.azure.com
