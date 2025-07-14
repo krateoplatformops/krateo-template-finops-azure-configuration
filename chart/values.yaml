@@ -1,3 +1,20 @@
-tenantId: 0000
-clientId: 0000
-clientSecret: 0000
+tenantId: # your tenant id
+clientId: # your client id
+clientSecret: # your secret id
+
+exporterConfig:
+  api:
+    path: /<container>/<directory>/<file_name>
+  additionalVariables:
+    account_name: # your storage account
+    # These values could be different depending on how you setup your FOCUS export and logic app
+    container: focus
+    directory: exports
+    file_name: static-export.csv
+
+scraperConfig:
+  pollingInterval: "1h"
+  tableName: finops
+  scraperDatabaseConfigRef:
+    name: finops-database-handler
+    namespace: krateo-system

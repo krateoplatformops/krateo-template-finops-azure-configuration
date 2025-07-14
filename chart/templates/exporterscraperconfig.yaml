@@ -1,8 +1,7 @@
 apiVersion: finops.krateo.io/v1
 kind: ExporterScraperConfig
 metadata:
-  name: exporterscraperconfig-sample
-  namespace: krateo-system
+  name: finops-azure-configuration
 spec:
   exporterConfig:
     api: 
@@ -12,18 +11,14 @@ spec:
       - "x-ms-version: 2017-11-09"
       endpointRef:
         name: azure-storage-account
-        namespace: krateo-system
+        namespace: {{ .Release.Namespace }}
     metricType: cost
     pollingInterval: "1h"
     additionalVariables:
-      account_name: # Your storage account name, compiled into the endpoint azure-storage-account
-      # These values could be different depending on how you setup your FOCUS export and logic app
-      container: focus
-      directory: exports
-      file_name: static-export.csv
+    {{- toYaml $.Values.exporterConfig.additionalVariables | nindent 6 }}
   scraperConfig:
-    pollingInterval: "1h"
-    tableName: finops # This table is used for costs and can be customized; resources usage will go in <table_name>_res
-    scraperDatabaseConfigRef: # This config is created by the krateo-installer
-      name: finops-database-handler
-      namespace: krateo-system
+    pollingInterval: {{ .Values.scraperConfig.pollingInterval }}
+    tableName: {{ .Values.scraperConfig.tableName }}
+    scraperDatabaseConfigRef: 
+      name: {{ .Values.scraperConfig.scraperDatabaseConfigRef.name }}
+      namespace: {{ .Values.scraperConfig.scraperDatabaseConfigRef.namespace }}

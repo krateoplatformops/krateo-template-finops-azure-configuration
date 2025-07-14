@@ -91,5 +91,6 @@ To start the exporter/scraper for all costs, install this chart in the Krateo in
 helm install krateo-template-finops-azure-configuration krateo/krateo-template-finops-azure-configuration -n krateo-system \
   --set tenantId=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \
   --set clientId=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \
-  --set clientSecret=xxxxxxxxxx
+  --set clientSecret=xxxxxxxxxx \
+  --set exporterConfig.additionalVariables.account_name=xxxxxxx
 ```
