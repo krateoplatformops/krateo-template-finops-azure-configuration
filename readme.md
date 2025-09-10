@@ -1,3 +1,8 @@
+> [!NOTE]  
+> This repository has been archived. Go here https://github.com/krateoplatformops-blueprints/azure-configuration-finops for the most recent version.
+
+
+
 # Krateo Composable FinOps - Prepare your Azure Environment
 This repository shows how to prepare your Azure environment for Krateo Composable FinOps
 
